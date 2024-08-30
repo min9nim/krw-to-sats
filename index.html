@@ -125,7 +125,7 @@
 <body>
   <section>
     <h3 class="time"></h3>
-    <h3 class="price">Upbit BTC: <b class="font-mono">Loading..</b></h3>
+    <h3 class="price">Upbit BTC: ₩<b class="font-mono">Loading..</b></h3>
     <hr />
     <fieldset class="group">
       <legend>krw to sats</legend>
@@ -261,7 +261,7 @@
 
             document.querySelector(
               '.price > b',
-            ).innerHTML = `₩ ${price.toLocaleString()}`
+            ).innerHTML = `${price.toLocaleString()}`
 
             syncSats(wonValue, pwValue)
             syncWon(satsValue, psValue)
