@@ -231,6 +231,21 @@
       }
     }
 
+    function syncTime() {
+      document.querySelector('.time').innerHTML = new Date().toLocaleString(
+        'ko-KR',
+        {
+          hour12: false,
+          year: 'numeric',
+          month: 'numeric',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        },
+      )
+    }
+
     loadValue()
     loadPValue()
 
@@ -292,19 +307,7 @@
       syncWon(satsValue, value)
     })
 
-    setInterval(() => {
-      document.querySelector('.time').innerHTML = new Date().toLocaleString(
-        'ko-KR',
-        {
-          hour12: false,
-          year: 'numeric',
-          month: 'numeric',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-        },
-      )
-    }, 1000)
+    syncTime()
+    setInterval(syncTime, 1000)
   </script>
 </body>
