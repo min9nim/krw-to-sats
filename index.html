@@ -117,11 +117,15 @@
     width: 100%;
     text-align: right;
   }
+  .font-mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      Liberation Mono, Courier New, monospace;
+  }
 </style>
 <body>
   <section>
     <h3 class="time"></h3>
-    <h3 class="price">Upbit BTC: <b>Loading..</b></h3>
+    <h3 class="price">Upbit BTC: <b class="font-mono">Loading..</b></h3>
     <hr />
     <fieldset class="group">
       <legend>krw to sats</legend>
@@ -143,7 +147,7 @@
       </div>
       <div class="item">
         <div class="label">=></div>
-        <div class="sats-result"></div>
+        <div class="sats-result font-mono"></div>
         sats
       </div>
     </fieldset>
@@ -168,7 +172,7 @@
       </div>
       <div class="item">
         <div class="label">=></div>
-        <div class="won-result"></div>
+        <div class="won-result font-mono"></div>
         ₩
       </div>
     </fieldset>
