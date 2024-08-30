@@ -181,10 +181,11 @@
     </div>
   </section>
   <script>
-    const unit = 100000000
-    let price
+    const unit = 100_000_000
+    let price = 80000000
     let wonValue, satsValue
-    let pwValue, psValue
+    let pwValue = 0,
+      psValue = 0
 
     function syncSats(value, p) {
       const sats = (value * unit) / price
@@ -196,31 +197,6 @@
       const won = (value * price) / unit
       const pWon = Math.floor(won * ((100 + p) / 100))
       document.querySelector('.won-result').innerHTML = pWon.toLocaleString()
-    }
-
-    async function fetchPrice() {
-      price = await fetch(
-        'https://api.upbit.com/v1/candles/days?market=KRW-BTC&count=1',
-      )
-        .then(res => res.json())
-        .then(res => res[0]['trade_price'])
-      document.querySelector(
-        '.price > b',
-      ).innerHTML = `₩ ${price.toLocaleString()}`
-      document.querySelector('.time').innerHTML = new Date().toLocaleString(
-        'ko-KR',
-        {
-          hour12: false,
-          year: 'numeric',
-          month: 'numeric',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-        },
-      )
-      syncSats(wonValue, pwValue)
-      syncWon(satsValue, psValue)
     }
 
     function loadValue() {
@@ -251,40 +227,80 @@
       }
     }
 
-    async function init() {
-      loadValue()
-      loadPValue()
-      await fetchPrice()
-      document.querySelector('.won-input').addEventListener('keyup', e => {
-        const value = Number(e.target.value.replaceAll(',', ''))
-        document.querySelector('.won-input').value = value.toLocaleString()
-        wonValue = value
-        localStorage.setItem('wonValue', value)
-        syncSats(value, pwValue)
-      })
-      document.querySelector('.sats-input').addEventListener('keyup', e => {
-        const value = Number(e.target.value.replaceAll(',', ''))
-        document.querySelector('.sats-input').value = value.toLocaleString()
-        satsValue = value
-        localStorage.setItem('satsValue', value)
-        syncWon(value, psValue)
-      })
-      document.querySelector('.pw-input').addEventListener('keyup', e => {
-        const value = Number(e.target.value.replaceAll(',', ''))
-        pwValue = value
-        localStorage.setItem('pwValue', value)
-        syncSats(wonValue, value)
-      })
-      document.querySelector('.ps-input').addEventListener('keyup', e => {
-        const value = Number(e.target.value.replaceAll(',', ''))
-        psValue = value
-        localStorage.setItem('psValue', value)
-        syncWon(satsValue, value)
-      })
+    loadValue()
+    loadPValue()
+
+    const ws = new WebSocket('wss://api.upbit.com/websocket/v1')
+    ws.onmessage = msg => {
+      try {
+        if (msg.data) {
+          let bin = new Blob([msg.data], {
+            type: 'application/json',
+          })
+          bin.text().then(t => {
+            price = JSON.parse(t).trade_price || 0
+
+            document.querySelector(
+              '.price > b',
+            ).innerHTML = `₩ ${price.toLocaleString()}`
+
+            syncSats(wonValue, pwValue)
+            syncWon(satsValue, psValue)
+          })
+        }
+      } catch (e) {
+        ws.close()
+      }
+    }
+    ws.onopen = () => {
+      ws.send(
+        '[{"ticket":"BitcoinPrice"},{"type":"ticker","codes":["KRW-BTC"]}]',
+      )
+    }
+    ws.onerror = function error(err) {
+      console.error(err)
     }
 
-    init()
+    document.querySelector('.won-input').addEventListener('keyup', e => {
+      const value = Number(e.target.value.replaceAll(',', ''))
+      document.querySelector('.won-input').value = value.toLocaleString()
+      wonValue = value
+      localStorage.setItem('wonValue', value)
+      syncSats(value, pwValue)
+    })
+    document.querySelector('.sats-input').addEventListener('keyup', e => {
+      const value = Number(e.target.value.replaceAll(',', ''))
+      document.querySelector('.sats-input').value = value.toLocaleString()
+      satsValue = value
+      localStorage.setItem('satsValue', value)
+      syncWon(value, psValue)
+    })
+    document.querySelector('.pw-input').addEventListener('keyup', e => {
+      const value = Number(e.target.value.replaceAll(',', ''))
+      pwValue = value
+      localStorage.setItem('pwValue', value)
+      syncSats(wonValue, value)
+    })
+    document.querySelector('.ps-input').addEventListener('keyup', e => {
+      const value = Number(e.target.value.replaceAll(',', ''))
+      psValue = value
+      localStorage.setItem('psValue', value)
+      syncWon(satsValue, value)
+    })
 
-    setInterval(fetchPrice, 3000)
+    setInterval(() => {
+      document.querySelector('.time').innerHTML = new Date().toLocaleString(
+        'ko-KR',
+        {
+          hour12: false,
+          year: 'numeric',
+          month: 'numeric',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        },
+      )
+    }, 1000)
   </script>
 </body>
